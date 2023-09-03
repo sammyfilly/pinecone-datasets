@@ -81,7 +81,7 @@ def test_io_no_queries(tmpdir):
     ds = Dataset.from_pandas(documents=d, queries=None, metadata=metadata)
 
     assert ds.queries.empty
-    assert [_ for _ in ds.iter_queries()] == []
+    assert not list(ds.iter_queries())
 
     ds.to_path(str(dataset_path))
 
@@ -93,7 +93,7 @@ def test_io_no_queries(tmpdir):
     pd_assert_frame_equal(loaded_ds.documents, ds.documents)
 
     assert loaded_ds.queries.empty
-    assert [_ for _ in loaded_ds.iter_queries()] == []
+    assert not list(loaded_ds.iter_queries())
 
 
 def test_io_access_to_forbidden_functions():

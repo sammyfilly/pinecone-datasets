@@ -149,17 +149,17 @@ class Dataset(object):
         """
         if df is None or df.empty:
             return pd.DataFrame(columns=[column_name for column_name, _, _ in schema])
-        else:
-            if column_mapping is not None:
-                df.rename(columns=column_mapping, inplace=True)
-            for column_name, is_nullable, null_value in schema:
-                if column_name not in df.columns and not is_nullable:
+        if column_mapping is not None:
+            df.rename(columns=column_mapping, inplace=True)
+        for column_name, is_nullable, null_value in schema:
+            if column_name not in df.columns:
+                if is_nullable:
+                    df[column_name] = null_value
+                else:
                     raise ValueError(
                         f"error, file is not matching Pinecone Datasets Schmea: {column_name} not found"
                     )
-                elif column_name not in df.columns and is_nullable:
-                    df[column_name] = null_value
-            return df[[column_name for column_name, _, _ in schema]]
+        return df[[column_name for column_name, _, _ in schema]]
 
     def __init__(
         self,
@@ -249,7 +249,7 @@ class Dataset(object):
                     raise ValueError(
                         f"error, file is not matching Pinecone Datasets Schmea: {column_name} not found"
                     )
-                elif column_name not in dataset_schema_names and is_nullable:
+                elif column_name not in dataset_schema_names:
                     columns_to_null.append((column_name, null_value))
                 else:
                     columns_not_null.append(column_name)
@@ -270,15 +270,12 @@ class Dataset(object):
                 for column_name, null_value in columns_to_null:
                     df[column_name] = null_value
                 return df
-            # TODO: add more specific error handling, explain what is wrong
             except Exception as e:
-                print("error, no exception: {}".format(e), file=sys.stderr)
+                print(f"error, no exception: {e}", file=sys.stderr)
                 raise (e)
         else:
             warnings.warn(
-                "WARNING: No data found at: {}. Returning empty DF".format(
-                    read_path_str
-                ),
+                f"WARNING: No data found at: {read_path_str}. Returning empty DF",
                 UserWarning,
                 stacklevel=0,
             )
@@ -297,17 +294,15 @@ class Dataset(object):
         ) as f:
             metadata = json.load(f)
         try:
-            out = DatasetMetadata(**metadata)
-            return out
-        # TODO: add more specific error handling, explain what is wrong
+            return DatasetMetadata(**metadata)
         except ValidationError as e:
             raise e
 
     def __getitem__(self, key: str):
-        if key in ["documents", "queries"]:
+        if key in {"documents", "queries"}:
             return getattr(self, key)
         else:
-            raise KeyError("Dataset does not have key: {}".format(key))
+            raise KeyError(f"Dataset does not have key: {key}")
 
     def __len__(self) -> int:
         return self.documents.shape[0]
@@ -480,20 +475,19 @@ class Dataset(object):
             raise ValueError(
                 f"index {index_name} already exists, Pinecone Datasets can only be upserted to a new indexe"
             )
-        else:
-            # create index
-            print("creating index")
-            try:
-                self._pinecone_client.create_index(
-                    name=index_name,
-                    dimension=self.metadata.dense_model.dimension,
-                    **kwargs,
-                )
-                print("index created")
-                return True
-            except Exception as e:
-                print(f"error creating index: {e}")
-                return False
+        # create index
+        print("creating index")
+        try:
+            self._pinecone_client.create_index(
+                name=index_name,
+                dimension=self.metadata.dense_model.dimension,
+                **kwargs,
+            )
+            print("index created")
+            return True
+        except Exception as e:
+            print(f"error creating index: {e}")
+            return False
 
     def to_pinecone_index(
         self,

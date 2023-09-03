@@ -76,8 +76,7 @@ def test_convert_metadata_from_dict_to_json():
     )
 
     d3 = None
-    s3 = None
-    assert Dataset._convert_metadata_from_dict_to_json(d3) == s3
+    assert Dataset._convert_metadata_from_dict_to_json(d3) is None
     assert (
         Dataset._convert_metadata_from_json_to_dict(
             Dataset._convert_metadata_from_dict_to_json(d3)
