@@ -70,8 +70,8 @@ def test_io_cloud_storage_path():
 
 def test_io_cloud_storage_catalog():
     dataset_name = "test_io_dataset"
-    dataset_id = dataset_name + "_" + datetime.now().strftime("%Y%m%d%H%M%S")
-    catalog_base_path = f"s3://ram-datasets/unittests/catalog/"
+    dataset_id = f"{dataset_name}_" + datetime.now().strftime("%Y%m%d%H%M%S")
+    catalog_base_path = "s3://ram-datasets/unittests/catalog/"
     metadata = DatasetMetadata(
         name=dataset_name,
         created_at="2021-01-01 00:00:00.000000",

@@ -18,11 +18,10 @@ def test_catalog():
         "https://storage.googleapis.com/pinecone-datasets-dev/quora_all-MiniLM-L6-bm25/metadata.json"
     )
 
-    found = False
-    for dataset in catalog.list_datasets(as_df=False):
-        if catalog_as_dict["name"] == dataset:
-            found = True
-            break
+    found = any(
+        catalog_as_dict["name"] == dataset
+        for dataset in catalog.list_datasets(as_df=False)
+    )
     assert found
 
 

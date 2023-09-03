@@ -22,9 +22,8 @@ def get_cloud_fs(
     """
     is_anon = path == cfg.Storage.endpoint
     if path.startswith("gs://") or "storage.googleapis.com" in path:
-        fs = gcsfs.GCSFileSystem(token="anon" if is_anon else None, **kwargs)
+        return gcsfs.GCSFileSystem(token="anon" if is_anon else None, **kwargs)
     elif path.startswith("s3://") or "s3.amazonaws.com" in path:
-        fs = s3fs.S3FileSystem(anon=is_anon, **kwargs)
+        return s3fs.S3FileSystem(anon=is_anon, **kwargs)
     else:
-        fs = LocalFileSystem()
-    return fs
+        return LocalFileSystem()
